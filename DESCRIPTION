@@ -1,0 +1,36 @@
+Package: phydoser
+Type: Package
+Title: Design a follow-up single-cell sequencing experiment from bulk sequencing data
+Version: 1.0
+Date: 2020-05-13
+Authors@R: c(
+    person("Leah", "Weber", email = "leahlw2@illinois.edu",
+         role = c("aut", "cre")),
+   person("Nuraini", "Aguse", email = "aguse2@illinois.edu",
+         role = c("aut")),
+   person("Mohammed", "El-Kebir", email = "melkebir@illinois.ed",
+         role = c("aut")))
+Description: The description of a package is usually long,
+    spanning multiple lines. The second and subsequent lines
+    should be indented, usually with four spaces.
+License: AGPL-3
+Encoding: UTF-8
+Imports: 
+    Rcpp,
+    dplyr,
+    stringr,
+    tidyr,
+    pmultinom,
+    magrittr
+LinkingTo: Rcpp
+RoxygenNote: 7.1.0
+Depends: 
+    R (>= 2.10)
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown,
+    DiagrammeR,
+    RColorBrewer,
+    testthat
+VignetteBuilder: knitr

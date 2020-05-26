@@ -1,0 +1,331 @@
+---
+title: "a phydose Package Tutorial"
+output: rmarkdown::html_vignette
+date: " `r Sys.Date()`"
+bibliography: bibliography.bib
+vignette: >
+  %\VignetteIndexEntry{phydose-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+## Background
+phydose is a package to implement Phylogenetic Design Of Single-cell sequencing Experiments (PhyDOSE) [@weber2020phydose]. The goal of PhyDOSE is to aid in the design of a follow-up single-cell DNA sequencing experiment from a prior bulk sequencing experiment with the goal of inferring the evolutionary history of a tumor. Given a set of candidate phylogenetic trees $\mathcal{T}$, a set of corresponding frequency matrices \mathcal{F} and a confidence level $\gamma$, PhyDOSE calculates the number of single-cells that should be sequenced in order to infer the phylogenetic tree with confidence level $\gamma$.
+
+PhyDOSE relies on the key concepts of _featurette_, _distinguishing feature_ and _distinguishing feature family_.  These are defined below:
+
+_Featurette_ ($\phi$)
+  : a subset of mutations that form a connected path starting from the root of the tree
+
+_Distinguishing Feature_ ($\Pi$)
+: a set of featurettes that are present in one phylogenetic tree in the candidate set but absent in all other trees.
+
+Intuitively, a distinguishing feature is simply a way to succinctly and uniquely describe a tree within a set of trees $\mathcal{T}$.  In practice, a tree can be described by more than one distinguishing feature. Therefore, we introduce the conccept of a _distinguishing feature family_.
+
+_Distinguishing Feature Family_ ($\Phi$)
+  : the minimal set of all distinguishing features of a tree. 
+
+
+Using a combinatorial approach, PhyDOSE first enumerates the minimal distinguishing feature family $\Phi$ for each tree in the candidate set. Then conditioning on each tree $T \in \mathcal{T}$ and using the corresponding distinguishing feature family $\Phi$,  PhyDOSE performs a power calculation of the multinomial tail probability in order to determine the minimum number of cells needed to observe at least one distinguishing feature $\Pi$ within the distinguishing feature family $\Phi$ at the specified confidence level $\gamma$.  PhyDOSE performs a power calculation of the following probability:
+
+$$P(Y_{k} \mid \mathbf{u}(T,\mathbf{f})) = \sum_{\emptyset \subsetneq \Phi' \subseteq \Phi} (-1)^{|\Phi'|+1} \sum_{\ell \in \mathbf{c}(I(\Phi'),k)} \mathrm{Mult}(\ell \mid k, \mathbf{u}(T,\mathbf{f}))$$
+
+
+where  
+
+* $Y_k$ is the event that we observe every featurette $\phi$ in at least one distinguishing feature $\Pi$ within the distinguishing feature family $\Phi$ when sampling $k$ cells,   
+* $\mathbf{u}(T, \mathbf{f})$ is a function that generates the clonal prevalence rates when given a tree $T$ and a variant allele frequency vector $\mathbf{f}$,  
+* $\mathbf{c}(\Pi,k)$ is a function that generates  all possible successful outcomes of an experiment with $k$ cells. Specifically, $\mathbf{c}(\Pi,k) = [c_i]$, such that $\sum_{i=0}^n c_i = k$, $c_i > 0$ if clone $i$ is a featurette of $\Pi$ and $c_i \ge 0$ otherwise,  
+* and $I(\Phi')$ is the set of all featurettes in $\Phi'$, i.e.\ $I(\Phi') = \bigcup_{\Pi \in \Phi'} \Pi$. 
+
+PhyDOSE uses Davis et al.'s pmultinom package [-@davis2019scopit] to perform the fast calculation of the multinomial tail probability ($\sum_{\ell \in \mathbf{c}(I(\Phi'),k)} \mathrm{Mult}(\ell \mid k, \mathbf{u}(T,\mathbf{f}))$). 
+
+For each tree $T \in \mathcal{T}$, PhyDOSE returns the minimum number of cells $k$ such that $P(Y_{k} \mid \mathbf{u}(T,\mathbf{f})) > \gamma$. This results in a distribution of cells over the set of trees in the candidate set $\mathcal{T}$. PhyDOSE will return a single value $k^*$ based on a specified quantile of this distribution. 
+
+PhyDOSE can handle an expected non-negative false negative rate $\beta$ of the single-cell sequencing technology.  It derives new clonal prevalence rates $\mathbf{u}(T,\mathbf{f}, \beta)$ from $\mathbf{u}(T,\mathbf{f})) = [u_i]$ by setting $u'_i = (1 - \beta)^{n_i}$ where $n_i$ is the number of mutations in featurette $i$. Then we set $u'_i =1 - \sum^{n}_{i=1} u'_i$.   
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Data Structures
+Before we introduce the phydose package with a tutorial, it is important to first discuss the data structures expected by the `phydose` function. phydose comes packaged with two datasets that can be used to learn the capabilities of the package as well as to better undertand the data structures. These two datasets are named  `phydata` and `AML38`. `phydata` is a small example and `AML38` is from an acute myeloid leukemia cohort (AML) [@morita2020clonal]. These example datasets are comprised of a list of four lists:
+
+1.  __trees__: a list of candidate trees $\mathcal{T}$   
+2.  __fmatrices__: a list of frequency matrices that corresponds to each candidate tree  
+3.  __u_list__: a list of clonal prevalance matrices  
+4.  __graphs__: dot format string representing each tree   
+
+
+We will start by loading the phydose package and discussing each of the these four lists.
+
+```{r setup}
+#load the package
+library(phydose)
+
+```
+
+
+### Trees
+The format used for trees in phydose is a binary matrix where each clone is a row and each mutation in the tree is a column. An entry of $1$ in the matrix means that mutation $j$ is present in clone $i$ for all $i \in [\textrm{clones}]$ and all $j \in [\textrm{mutations}]$ and $0$ otherwise. 
+
+
+```{r tree}
+ #>rows must be named with the mutations in each clone
+ rownames(phydata$trees[[1]])
+ 
+ #> columns must be named with the mutation names
+ colnames(phydata$trees[[1]])
+ 
+ #inspect the binary matrix
+ phydata$trees[[1]]
+```
+
+phydose suggests DiagrammeR package in order to visualize the tree and the distinguishing features and featurettes. If DiagrammeR is installed, the mutation tree can be plotted using the ` plotTree` function provided by phydose.
+```{r showtree, warning=FALSE}
+#generate a plot of tree 1
+tree1Plot <- plotTree(tree=phydata$trees[[1]]) 
+
+#render the plot using DiagrammeR
+DiagrammeR::render_graph(tree1Plot, layout="tree")
+```
+
+
+### Frequency Matrices
+Besides a set of candidate trees $\mathcal{T}$, the other key input to PhyDOSE is set of frequency matrices $\mathcal{F}$ corresponding to each tree or a single frequency matrix that is applicable for all trees in the candidate set. Each row of a frequency matrix represents a tumor biopsy sample and each column represents a mutation and the entry in the matrix represents of the variant allele frequency of mutation $j$ for tumor biopsy sample $i$ for all $i \in [\textrm{biopsy sample}]$ and $j \in [\textrm{mutations}]$.
+
+```{r fmat}
+
+ 
+ #> columns must be named with the mutation names
+ colnames(phydata$trees[[1]])
+ 
+ phydata$fmatrices[[1]]
+```
+
+
+### Clonal Prevalance Matrices
+The ` CalcU ` function can be used to obtain a clonal prevalance matrix $U$ from a binary tree matrix $B$ and the frequency matrix $F$. The set of clonal prevalances can optionally be supplied to PhyDOSE in place of a set of frequency matrices. The set of clonal prevalance matrices $U$ are included in the example data for convenience.
+```{r umat}
+ #> columns must be named with the mutations in each clone
+ colnames(phydata$trees[[1]])
+
+CalcU(tree =phydata$trees[[1]], f=phydata$fmatrices[[1]] ) 
+
+ phydata$u_list[[1]]
+```
+
+
+### Graphs 
+The `CreateDOT` function can used to convert a  binary matrix tree to dot format. If the DiagrammeR package is installed, the tree can be visualized from the dot string.  
+
+```{r graphdot}
+
+tree2dot <- CreateDOT(phydata$trees[[2]])
+DiagrammeR::grViz(tree2dot)
+
+
+```
+
+The dot strings are included in the packaged data for convenience.
+```{r graph, eval=F}
+# not run
+DiagrammeR::grViz(phydata$graph[[2]])
+
+
+```
+
+
+
+
+## Tutorial
+
+To introduce the phydose package, we will walk with through an example with real data. Morita el al. [-@morita2020clonal] published a study of the clonal evolution of an actue myeloid leukemia (AML) cohort using high throughput single-cell DNA sequencing. 
+
+This example uses data from patient 38 of this AML cohort.  Utilizing the published bulk-sequencing variant allele frequencies [@morita2020clonal], a candidate set of trees was enumerated using SPRUCE [@ElKebir2015by]. . 
+
+```{r}
+#number of candidate trees
+length(AML38$trees)
+```
+
+As seen above, SPRUCE [@ElKebir2015by] was used to enumerate a total of `r length(AML38$trees)[1]` candidate trees for patient 38.
+
+### PhyDOSE
+
+The input to `phydose` is a set of trees, one of the following: a corresponding set of frequency matrices, a corresponding set of clonal prevalance matrices or a single frequenc matrix that applies to all trees in the candidate set, an optional confidence level $\gamma$ (defaults to 0.95), an optional false negative rate (defaults to 0), and an optional quantile for calculating $k^*$ (defaults to 1). 
+
+Based on the estimated sequencing technology, we will use a false negative rate of 0.05 (` fnr = 0.049`) and we will take $k^*$ to be the maximum of the distribution (` kstar_quant =1`) of the number of cells calculated over all enumerated trees for patient 38. 
+
+```{r}
+phydose.out <- phydose(trees = AML38$trees, fmatrices = AML38$fmatrices, 
+                       gamma=0.95, fnr=0.049, kstar_quant = 1)
+
+str(phydose.out)
+
+#k* value determined by PhyDOSE based on the specified quantile
+phydose.out$kstar
+
+# the number of cells for each tree and sample at the specified confidence level
+head(phydose.out$kTdata)
+```
+
+The output of `phydose` is a list of two items.  
+1.  `kstar` is the value of $k^*$ at the specified quantile.    
+2. `kTdata` is a dataframe that contains the value of $k$ for all trees and all samples.  
+
+As we can see, PhyDOSE suggests that `r phydose.out$kstar` cells should be sequenced in a follow-up single-cell experiment aimed at identifying the phylogentic tree. This is a 90.4% reduction in the number of cells to sequence from the 7,235 cells sequenced in the original study [@morita2020clonal].
+
+### Visualizing the Output
+
+The ouput dataframe  (`kTdata`) can be used to visualize the distribution of the number of cells to sequence for each $T \in \mathcal{T}$. 
+
+```{r boxplot }
+library(ggplot2)
+
+ggplot(phydose.out$kTdata, aes(x= factor(sample), y = cells)) + 
+  geom_boxplot() + xlab("tumor biopsy")
+
+```
+
+
+### Generating the Distinguishing Feature Family
+
+The `phydose` function will automatically generate the minimal distinguishing feature for each tree. However given a set of trees, `generateDistFeat` can be used to compute the minimal distinguishing feature family for each tree.
+
+```{r getdff}
+
+#generate the distinguishing feature family for each tree
+aml38dff <- generateDistFeat(AML38$trees)
+
+#the number of minimal distinguishing feature families (1 per tree)
+length(aml38dff)
+
+
+#the distinguishing feature family of tree 1
+aml38dff[[1]]
+
+#the number of distinguishing features in the first 
+#distinguishing feature family
+length(aml38dff[[1]])
+
+#the first distinguishing feature of the family
+aml38dff[[1]][[1]]
+
+#the first featurette of the first distinguishing feature of the family
+aml38dff[[1]][[1]][1]
+
+
+```
+
+`AML38DFF` is included in the package and contains the pre-computed distinguishing feature family for the candidate set of trees in the `AML38` patient data.
+
+
+### Visualizing Distinguishing Features and Featurettes
+
+The `plotTree` function can also be used to visualize a specific distinguishing feature of a specified tree. For example, we can visualize the first distinguishing feature for tree 1 in the AML38 dataset.
+
+```{r}
+
+amlTree1plot <- plotTree(AML38$trees[[1]], distfeat  = aml38dff[[1]][[1]])
+
+DiagrammeR::render_graph(amlTree1plot, layout="tree")
+
+```
+
+
+
+Alternatively, we can visualize a specific featurette of a specific distinguishing feature.
+```{r}
+
+#visualize only featurette 1 of the distinguishing feature 1 of tree 1
+amlTree1plot <- plotTree(AML38$trees[[1]], featurette =  aml38dff[[1]][[1]][1])
+DiagrammeR::render_graph(amlTree1plot, layout="tree")
+
+```
+
+
+### PhyDOSE with Pre-Computed Distinguishing Feature Families
+
+`phydose` can optionally take a pre-computed set of distinguishing features corresponding to set of trees as input. For example,
+one might want to calculate $k^*$ for a large number of values for the confidence level $\gamma$ and/or the false negative rate and might not want `phydose` to regenerate the distinguishing features each time.
+
+```{r multgamma, eval=T}
+
+allgamma <- data.frame(gamma = numeric(), cells = numeric(), fn=numeric())
+gamma_values  <- seq(0, 0.95, 0.05)
+for(g in gamma_values){
+  for(f in c(0.05, 0.1)){
+      phydose.out <- phydose(trees = AML38$trees, fmatrices = AML38$fmatrices, distFeat = AML38DFF, 
+                             gamma=g, fnr= f)
+      allgamma <- rbind(allgamma, 
+                        data.frame(gamma=g, cells=phydose.out$kstar, fn=f))
+    
+  }
+}
+
+head(allgamma)
+```
+
+These values can be plotted to better understand the relationship between $\gamma$ and $k^*$.
+
+```{r, eval=T}
+ggplot(allgamma, aes(x=cells, y= gamma, color=factor(fn))) + geom_step() + 
+  scale_color_discrete(name ="FN Rate") + 
+  scale_y_continuous(breaks= seq(0,1, 0.1)) + 
+  theme(legend.position = "bottom")
+```
+
+
+
+
+## I/O Support
+In order to aid the user in creating the S3 objects inputs for PhyDOSE, a number of convenience functions are provided to read in input data from files. There are four functions available: 
+
+1.  `ReadJoint` - reads a set of trees from a single input file with the tree information and frequency matrix alternating for each tree.  
+2. `ReadJointDir` - reads  a set of trees and frequency matrices from a directory when each tree is separate file with the corresponding frequency matrix in the same file.  
+3. `ReadTrees` - reads a set of trees from a single file and converts them to binary matrices. This is also useful if only the distinguishing features of a set of trees is to be explored.  
+4.  `ReadFmatrices` - reads a set of frequency matrices stored in the same file.  
+
+An example of the joint input format is included as an external file with the package. You can inspect the file format with the following code but only the path is needed to read the files. 
+
+```{r}
+#find the path to example file included with the package
+path_to_file <- system.file("extdata", "example.txt", package = "phydose")
+
+#read the file for inspection only
+example_input <- readLines(path_to_file)
+
+#replace /t with space for better display only
+example_input <- stringr::str_replace_all(example_input, "\t", " ")
+
+#show example data
+example_input
+
+
+```
+
+Each tree in the file should include a header of '...tree #'. This line should immediately followed by the edge lists with one edge per line using the format "parent child".  For example, in tree 1 mutation "3" is a parent of mutation "1".
+
+The frequency matrices must include the information header shown in lines 8-11 and followed by tab seperated specificied values.
+
+These same format requirements apply for all of the phydose reading functions. 
+
+The following example shows how to use one of the phydose reading functions to generate the example dataset included in the package. 
+```{r}
+
+#read in the set of trees and frequency matrices to replicate the creation of phydata
+exampleData <-  ReadJoint(path_to_file)
+
+identical(exampleData, phydata)
+
+```
+
+
+
+
+
+## References
