@@ -4,7 +4,14 @@
 \alias{plotTree}
 \title{Plot a tree in the set}
 \usage{
-plotTree(tree, distfeat = NULL, featurette = NULL, colors = NULL)
+plotTree(
+  tree,
+  distfeat = NULL,
+  featurette = NULL,
+  colors = NULL,
+  u = NULL,
+  f = NULL
+)
 }
 \arguments{
 \item{tree}{an input binary tree}
@@ -12,6 +19,10 @@ plotTree(tree, distfeat = NULL, featurette = NULL, colors = NULL)
 \item{featurette}{a vector of mutations}
 
 \item{colors}{a vector of colors the length of distFeats or of length 1}
+
+\item{u}{a named vector of clonal prevalence rates}
+
+\item{f}{a named vector of frequencies}
 
 \item{distFeat}{a list of featurettes}
 }

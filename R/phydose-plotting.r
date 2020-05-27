@@ -95,6 +95,8 @@ CreateTreeGraph <- function(tree, distFeat=NULL, featurette=NULL, colors=NULL){
 #' @param distFeat a list of featurettes
 #' @param featurette a vector of mutations
 #' @param colors a vector of colors the length of distFeats or of length 1
+#' @param u a named vector of clonal prevalence rates
+#' @param f a named vector of frequencies
 #' @return a DiagrammeR graph
 #' @export
 plotTree <- function(tree, distfeat = NULL, featurette = NULL, colors = NULL, u=NULL, f=NULL){
