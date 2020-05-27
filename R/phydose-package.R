@@ -1,5 +1,5 @@
 ## usethis namespace: start
-#' @useDynLib phydose, .registration = TRUE
+#' @useDynLib phydoser, .registration = TRUE
 ## usethis namespace: end
 NULL
 
