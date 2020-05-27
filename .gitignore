@@ -3,3 +3,5 @@ phydoser.Rproj
 *.Rproj
 .Rhistory
 .Rdata
+src/*.so
+src/*.o
