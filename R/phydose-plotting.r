@@ -209,8 +209,8 @@ plotTree <- function(tree, distfeat = NULL, featurette = NULL, colors = NULL, u=
       nodes_df <- dplyr::mutate(nodes_df, label = sprintf("%s\nf:%0.2f", label,f ))
 
     }else if(!is.null(f) && !is.null(u)){
-      nodes_df <- dplyr::mutate(nodes_df, label = sprintf("%s\nf:%0.2f\nu:%0.2f", label,f,u ))
-      nodes_df$fontsize <- 8
+      nodes_df <- dplyr::mutate(nodes_df, label = sprintf("%s\nf:%0.2f u:%0.2f", label,f,u ))
+      nodes_df$fontsize <- 5
 
     }else{
       nodes_df$label <- nodes_df$label
