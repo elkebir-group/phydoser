@@ -21,7 +21,7 @@ follow-up experiment from a previous bulk sequencing experiment.
 ## Installation
 
 ``` r
-#development versions
+#development version
 devtools::install_github("elkebir-group/phydoser")
 ```
 
