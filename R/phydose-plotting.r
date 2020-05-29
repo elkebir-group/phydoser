@@ -160,7 +160,7 @@ plotTree <- function(tree, distfeat = NULL, featurette = NULL, colors = NULL, u=
     }
     node_labels <- ifelse(stringr::str_length(nodes) > 15, stringr::str_sub(nodes, 1, 15), nodes)
 
-    fontsize <- ifelse(stringr::str_length(node_labels)  > 7, 6, 12)
+    fontsize <- ifelse(stringr::str_length(node_labels)  > 7, 6, 8)
     nodes_df <- DiagrammeR::create_node_df(n=numNodes,label = nodes, value = nodes,
                                            shape="ellipse", color=node_colors, fixedsize=F,fontsize=fontsize)
 
@@ -204,9 +204,11 @@ plotTree <- function(tree, distfeat = NULL, featurette = NULL, colors = NULL, u=
 
 
       nodes_df <- dplyr::mutate(nodes_df, label = sprintf("%s\nu:%0.2f", label,u ))
+      nodes_df$height <- .8
 
     }else if(!is.null(f) && is.null(u)){
       nodes_df <- dplyr::mutate(nodes_df, label = sprintf("%s\nf:%0.2f", label,f ))
+      nodes_df$height <- .8
 
     }else if(!is.null(f) && !is.null(u)){
       nodes_df <- dplyr::mutate(nodes_df, label = sprintf("%s\nf:%0.2f\nu:%0.2f", label,f,u ))
