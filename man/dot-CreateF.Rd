@@ -4,10 +4,12 @@
 \alias{.CreateF}
 \title{Creates an F matrix from character vector}
 \usage{
-.CreateF(vecs)
+.CreateF(vecs, fvalues)
 }
 \arguments{
 \item{vecs}{the character vector from which the frequency matrix is created}
+
+\item{fvaluse}{a string either "fplus" or "fminus" specifying with frequencies should be read}
 }
 \value{
 a matrix of the frequencies

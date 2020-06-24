@@ -122,10 +122,12 @@ ReadJointDir <- function(dir, fmultiplier=1){
 }
 #' Read a file containing a candidate set of trees and an accompnaying F matrix for each tree.
 #' @param fname the path to the file that is to be read
+#' @param fmultiplier a multiplier for the frequency values, defaults to 1
+#' @param fvalues a string specifying whether the "fplus" or "fminus" values should be read, defaults to "fplus"
 #' @return a list
 #' @export
 #' @importFrom magrittr %>%
-ReadJoint <- function(fname, fmultiplier=1){
+ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus"){
 
 
 
@@ -139,7 +141,7 @@ ReadJoint <- function(fname, fmultiplier=1){
 
     dots <- trees_dots$graph
 
-    fmats <- .GetAllF(fil)
+    fmats <- .GetAllF(fil, fvalues)
 
 
     #key <- .CreateKey(trees[[1]])
@@ -243,7 +245,7 @@ ReadJoint <- function(fname, fmultiplier=1){
 #'
 #' @return a list of frequency matrices
 #'
-.GetAllF <- function(charVec){
+.GetAllF <- function(charVec, fvalues){
   f_count <- 0
   s <- NULL
   e <- NULL
@@ -295,10 +297,23 @@ ReadJoint <- function(fname, fmultiplier=1){
   return(fmatrix)
 }
 
+
+
+.CleanFmatrixFminus <-function(df){
+  fmatrix <- df %>% dplyr::select(sample_index, character_label, fminus) %>%
+    dplyr::mutate(fplus = as.numeric(fminus)) %>%
+    tidyr::pivot_wider(id_cols = sample_index, names_from = character_label, values_from = fminus)  %>%
+    dplyr::select(-sample_index)
+  fmatrix <- as.matrix(fmatrix)
+
+  return(fmatrix)
+}
+
 #' Creates an F matrix from character vector
 #' @param vecs the character vector from which the frequency matrix is created
+#' @param fvaluse a string either "fplus" or "fminus" specifying with frequencies should be read
 #' @return a matrix of the frequencies
-.CreateF<- function(vecs){
+.CreateF<- function(vecs, fvalues){
 
 
       vecs <- stringr::str_replace(vecs,"#", "")
@@ -312,7 +327,12 @@ ReadJoint <- function(fname, fmultiplier=1){
       colnames(fmatrix) <- header
 
       fmatrix <- as.data.frame(fmatrix, stringsAsFactors=F)
-      fmatrix <- .CleanFmatrix(fmatrix)
+      if(fvalues == "fplus"){
+        fmatrix <- .CleanFmatrix(fmatrix)
+      }else{
+        fmatrix <- .CleanFmatrixFminus(fmatrix)
+      }
+
 
   return(fmatrix)
 }

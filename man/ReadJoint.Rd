@@ -4,10 +4,14 @@
 \alias{ReadJoint}
 \title{Read a file containing a candidate set of trees and an accompnaying F matrix for each tree.}
 \usage{
-ReadJoint(fname, fmultiplier = 1)
+ReadJoint(fname, fmultiplier = 1, fvalues = "fplus")
 }
 \arguments{
 \item{fname}{the path to the file that is to be read}
+
+\item{fmultiplier}{a multiplier for the frequency values, defaults to 1}
+
+\item{fvalues}{a string specifying whether the "fplus" or "fminus" values should be read, defaults to "fplus"}
 }
 \value{
 a list

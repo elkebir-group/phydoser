@@ -4,7 +4,7 @@
 \alias{.GetAllF}
 \title{Converts all frequency matrices in the character vector to a list of frequency matrices}
 \usage{
-.GetAllF(charVec)
+.GetAllF(charVec, fvalues)
 }
 \arguments{
 \item{charVec}{a character vector that contains all of the text from the input file
