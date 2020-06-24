@@ -2,7 +2,7 @@
 % Please edit documentation in R/phydose-readdata.r
 \name{ReadTrees}
 \alias{ReadTrees}
-\title{Read in set of candidate trees in the given directory and 
+\title{Read in set of candidate trees in the given directory and
 convert to a binary matrix with clones as the rows and mutations as columns}
 \usage{
 ReadTrees(fname)
@@ -14,6 +14,6 @@ ReadTrees(fname)
 A list of binary matrices representing all trees located in the directory
 }
 \description{
-Read in set of candidate trees in the given directory and 
+Read in set of candidate trees in the given directory and
 convert to a binary matrix with clones as the rows and mutations as columns
 }

@@ -1,15 +1,16 @@
 ---
-title: "a phydoser Package Tutorial"
-output: rmarkdown::html_vignette
+title: "a phydoser package tutorial"
+output: rmarkdown::pdf_document
 date: " `r Sys.Date()`"
 bibliography: bibliography.bib
+always_allow_html: true
 vignette: >
-  %\VignetteIndexEntry{phydose-vignette}
+  %\VignetteIndexEntry{phydoser vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 ## Background
-phydose is a package to implement Phylogenetic Design Of Single-cell sequencing Experiments (PhyDOSE) [@weber2020phydose]. The goal of PhyDOSE is to aid in the design of a follow-up single-cell DNA sequencing experiment from a prior bulk sequencing experiment with the goal of inferring the evolutionary history of a tumor. Given a set of candidate phylogenetic trees $\mathcal{T}$, a set of corresponding frequency matrices \mathcal{F} and a confidence level $\gamma$, PhyDOSE calculates the number of single-cells that should be sequenced in order to infer the phylogenetic tree with confidence level $\gamma$.
+phydose is a package to implement Phylogenetic Design Of Single-cell sequencing Experiments (PhyDOSE) [@weber2020phydose]. The goal of PhyDOSE is to aid in the design of a follow-up single-cell DNA sequencing experiment from a prior bulk sequencing experiment with the goal of inferring the evolutionary history of a tumor. Given a set of candidate phylogenetic trees $\mathcal{T}$, a set of corresponding frequency matrices $\mathcal{F}$ and a confidence level $\gamma$, PhyDOSE calculates the number of single-cells that should be sequenced in order to infer the phylogenetic tree with confidence level $\gamma$.
 
 PhyDOSE relies on the key concepts of _featurette_, _distinguishing feature_ and _distinguishing feature family_.  These are defined below:
 

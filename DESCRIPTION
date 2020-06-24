@@ -32,5 +32,6 @@ Suggests:
     rmarkdown,
     DiagrammeR,
     RColorBrewer,
-    testthat
+    testthat,
+    lpSolve
 VignetteBuilder: knitr

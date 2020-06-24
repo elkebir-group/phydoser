@@ -7,7 +7,7 @@
 .CreateTree(vecs)
 }
 \arguments{
-\item{vecs}{a vector of strings with a space separator where the left string represents the parent and the 
+\item{vecs}{a vector of strings with a space separator where the left string represents the parent and the
 right string represents the child}
 }
 \value{

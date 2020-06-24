@@ -2,7 +2,7 @@
 % Please edit documentation in R/phydose-readdata.r
 \name{.CreateKey}
 \alias{.CreateKey}
-\title{Create a key that maps the columns of the trees and frequencies matrices to 
+\title{Create a key that maps the columns of the trees and frequencies matrices to
 the mutations}
 \usage{
 .CreateKey(mat)
@@ -14,6 +14,6 @@ the mutations}
 a dataframe creating the mapping of column ids to mutations
 }
 \description{
-Create a key that maps the columns of the trees and frequencies matrices to 
+Create a key that maps the columns of the trees and frequencies matrices to
 the mutations
 }
