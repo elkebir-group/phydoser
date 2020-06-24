@@ -257,7 +257,7 @@ ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus"){
       vecs <- charVec[s:e]
 
       f_count <- f_count + 1
-      fmat[[f_count]] <- .CreateF(vecs)
+      fmat[[f_count]] <- .CreateF(vecs, fvalues)
       s <- NULL
       e <- NULL
     }
