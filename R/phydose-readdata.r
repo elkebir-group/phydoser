@@ -305,7 +305,7 @@ ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus", include_u = T){
 
 .CleanFmatrixFminus <-function(df){
   fmatrix <- df %>% dplyr::select(sample_index, character_label, fminus) %>%
-    dplyr::mutate(fplus = as.numeric(fminus)) %>%
+    dplyr::mutate(fminus = as.numeric(fminus)) %>%
     tidyr::pivot_wider(id_cols = sample_index, names_from = character_label, values_from = fminus)  %>%
     dplyr::select(-sample_index)
   fmatrix <- as.matrix(fmatrix)
