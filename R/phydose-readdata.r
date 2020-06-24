@@ -127,7 +127,7 @@ ReadJointDir <- function(dir, fmultiplier=1){
 #' @return a list
 #' @export
 #' @importFrom magrittr %>%
-ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus"){
+ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus", include_u = T){
 
 
 
@@ -148,8 +148,11 @@ ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus"){
     if(fmultiplier != 1 && fmultiplier > 0){
       fmats <- lapply(fmats, .FMultiplier, fmultiplier)
     }
-
     u_list <- list()
+   if(include_u){
+
+
+
     for (i in 1:length(fmats)){
       tree <- trees[[i]]
       fmat <- fmats[[i]]
@@ -171,6 +174,7 @@ ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus"){
       # fmats[[i]] <- fmat
       # trees[[i]] <- tree
     }
+   }
     result <- list(trees = trees, fmatrices = fmats, u_list = u_list, graph = dots )
 
     return(result)
