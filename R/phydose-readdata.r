@@ -92,7 +92,7 @@ ReadTrees <- function(fname){
 #' @return a list
 #' @export
 
-ReadJointDir <- function(dir, fmultiplier=1){
+ReadJointDir <- function(dir, fmultiplier=1, fvalues = "fplus", include_u =F){
 
 
     files <- list.files(dir , include.dirs = TRUE)
@@ -105,7 +105,7 @@ ReadJointDir <- function(dir, fmultiplier=1){
   graphs <- list()
   for(f in files){
    #print(f)
-   file_out <- ReadJoint(file.path(dir,f), fmultiplier)
+   file_out <- ReadJoint(file.path(dir,f), fmultiplier, fvalues, include_u)
    trees <- c(trees, file_out$trees)
    fmatrices <- c(fmatrices, file_out$fmatrices)
    u_list <- c(u_list, file_out$u_list)
