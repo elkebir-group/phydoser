@@ -4,7 +4,7 @@
 \alias{ReadJointDir}
 \title{Read in data from a directory}
 \usage{
-ReadJointDir(dir, fmultiplier = 1)
+ReadJointDir(dir, fmultiplier = 1, fvalues = "fplus", include_u = F)
 }
 \arguments{
 \item{dir}{the directory where the files are stored}
