@@ -6,6 +6,8 @@
 #' @param a dataframe of sampled single cells
 #'
 #' @return a dataframe that returns the support for each tree in the set of input cells
+#' @export
+#'
 Reconcile <- function(dffs, cells){
   tree_support <- numeric(0)
 
