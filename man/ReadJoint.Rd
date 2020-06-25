@@ -4,7 +4,7 @@
 \alias{ReadJoint}
 \title{Read a file containing a candidate set of trees and an accompnaying F matrix for each tree.}
 \usage{
-ReadJoint(fname, fmultiplier = 1, fvalues = "fplus")
+ReadJoint(fname, fmultiplier = 1, fvalues = "fplus", include_u = T)
 }
 \arguments{
 \item{fname}{the path to the file that is to be read}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/phydose-mainfunctions.R
 \name{CalcU}
 \alias{CalcU}
-\title{Generates the clonal prevalence matrix U by mutlplying the frequency matrix by 
+\title{Generates the clonal prevalence matrix U by mutlplying the frequency matrix by
 the inverse of the tree matrix}
 \usage{
 CalcU(treeMat, f)
@@ -16,6 +16,6 @@ CalcU(treeMat, f)
 a matrix of clonal prevelance with samples as rows and clones as columns
 }
 \description{
-Generates the clonal prevalence matrix U by mutlplying the frequency matrix by 
+Generates the clonal prevalence matrix U by mutlplying the frequency matrix by
 the inverse of the tree matrix
 }

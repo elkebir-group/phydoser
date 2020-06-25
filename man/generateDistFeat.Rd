@@ -14,7 +14,7 @@ a list of lists of featurettes.
 }
 \description{
 For each tree in the input list, generateDistFeat finds the corresponding distinguishing feature family which
-is a set of distinguishing features made up of root to mutation paths (featurettes) that unqiuely distinguishes that tree from 
+is a set of distinguishing features made up of root to mutation paths (featurettes) that unqiuely distinguishes that tree from
 all other trees in the input list.
 }
 \examples{
