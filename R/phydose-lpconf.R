@@ -15,7 +15,7 @@
 #   fmat <- phydata$fmatrices[[i]]
 #   fmat_list <- genConf(fmat)
 #
-#   dff <- .RenameDF(phydataDFF[[i]], phydata$u_list[[i]])
+#   dff <- DF(phydataDFF[[i]], phydata$u_list[[i]])
 #
 #   fmax <- solveF(tree, fmat_list$fminus, fmat_list$fplus,dff, maxObj=T)
 #   fmin <- solveF(tree, fmat_list$fminus, fmat_list$fplus,dff, maxObj=F)
@@ -56,56 +56,106 @@
 
 
 solveF <- function(tree, fminus, fplus, dff, maxObj= T){
-  tree_inv <- t(solve(tree))
-  const <- .generateConstraints(tree_inv, fminus, fplus, dff, maxObj)
 
-  obj_constants <- c(rep(0, length(fminus)), 1)
-
-  obj_dir <- ifelse(maxObj, "max", "min")
+  dff <- .MatchCloneNames(dff, rownames(tree))
   if( requireNamespace("lpSolve", quietly = TRUE)){
+    objval <- -1
+
+    tree_inv <- t(solve(tree))
+    for(i in 1:length(dff)){
+
+      const <- .generateConstraints(tree_inv, fminus, fplus, dff[[i]], maxObj)
+
+      obj_constants <- c(rep(0, length(fminus)), 1)
+
+      obj_dir <- ifelse(maxObj, "max", "min")
 
 
-   opt <- lpSolve::lp(direction = obj_dir,
-                  objective.in = obj_constants,
-                  const.mat <- const$constraints,
-                  const.dir =  const$direction,
-                  const.rhs = const$rhs)
 
-  fmat <- matrix(opt$solution[1:length(fminus)], nrow=1, ncol=length(fminus))
-  colnames(fmat) <- names(fminus)
-  return(fmat)
+      opt <- lpSolve::lp(direction = obj_dir,
+                         objective.in = obj_constants,
+                         const.mat <- const$constraints,
+                         const.dir =  const$direction,
+                         const.rhs = const$rhs)
+
+      if(opt$objval > objval){
+        fmat <- matrix(opt$solution[1:length(fminus)], nrow=1, ncol=length(fminus))
+        objval <- opt$objval
+      }
+
+
+    }
+
+
+
+    colnames(fmat) <- names(fminus)
+    return(fmat)
   }else{
     return(NULL)
   }
 }
 
 .generateConstraints <- function(tree_inv, fminus, fplus, dff, maxObj=T){
- tree_inv_ord <- tree_inv[, names(fminus)]
- diagMat <- diag(x=1, length(fminus), length(fminus))
- colnames(diagMat) <- names(fminus)
+  tree_inv_ord <- tree_inv[, names(fminus)]
+  diagMat <- diag(x=1, length(fminus), length(fminus))
+  colnames(diagMat) <- names(fminus)
 
- constraints <- rbind(diagMat, diagMat)
+  #add left hand side of constraints to ensure f is non-negative and less than 1
+  constraints <- rbind(diagMat, diagMat)
 
- constraints <- rbind(constraints, tree_inv_ord)
- z_col <- c(rep(0, nrow(constraints)), rep(-1, length(dff)))
+  #add constraints for the sum condition
+  constraints <- rbind(constraints, tree_inv_ord)
 
- dff_clones <- tree_inv_ord[rownames(tree_inv_ord) %in% dff,]
 
- constraints <- rbind(constraints, dff_clones)
- constraints <- cbind(constraints, z_col)
 
- rhs <- c(fminus, fplus, rep(0, nrow(tree_inv_ord)), rep(0, length(dff)))
+  dff_clones <- tree_inv_ord[rownames(tree_inv_ord) %in% trimws(dff),]
 
- dir <- c( rep(">=", nrow(diagMat)), rep("<=", nrow(diagMat)), rep(">=", (nrow(tree_inv_ord))))
+  z_col <- c(rep(0, nrow(constraints)), rep(-1, length(dff)))
 
- if(maxObj){
-   dir_z <- rep(">=", length(dff))
- }else{
-   dir_z <- rep("<=", length(dff))
- }
+  constraints <- rbind(constraints, dff_clones)
+  constraints <- cbind(constraints, z_col)
 
- dir <- c(dir, dir_z)
- return(list(constraints = constraints, rhs = rhs, direction = dir))
+  rhs <- c(fminus, fplus, rep(0, nrow(tree_inv_ord)), rep(0, length(dff)))
+
+  dir <- c( rep(">=", nrow(diagMat)), rep("<=", nrow(diagMat)), rep(">=", (nrow(tree_inv_ord))))
+
+  if(maxObj){
+    dir_z <- rep(">=", length(dff))
+  }else{
+    dir_z <- rep("<=", length(dff))
+  }
+
+  dir <- c(dir, dir_z)
+  return(list(constraints = constraints, rhs = rhs, direction = dir))
+}
+
+
+.MatchCloneNames <- function(df_fam, clone_names){
+  clones <- stringr::str_split(clone_names, pattern = " ")
+  df_rename <- list()
+
+  for(i in 1:length(df_fam)){
+    df <- df_fam[[i]][[1]]
+
+    dfclones <- stringr::str_split(df, " ")
+    dfclones <- lapply(dfclones, function(x) x[x != ""])
+
+    df_new <- character()
+    for(d in dfclones){
+      for(c in clones){
+        if(identical(sort(d), sort(c))){
+          df_new  <- c(  paste(c, collapse = " "), df_new)
+          break
+        }
+      }
+
+    }
+
+    df_rename[[i]] <- df_new
+  }
+
+
+  return(df_rename)
 }
 
 
