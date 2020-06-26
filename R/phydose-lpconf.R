@@ -58,6 +58,48 @@ solveFLower <- function(tree, fminus, fplus, dff){
 }
 
 
+solveFUpper2 <- function(tree, fminus, fplus, dff){
+
+  dff <- .MatchCloneNames(dff, rownames(tree))
+
+  if( requireNamespace("lpSolve", quietly = TRUE)){
+    objval <- -1
+
+    tree_inv <- t(solve(tree))
+    for(i in 1:length(dff)){
+
+      const <- .generateConstraintsUpper2(tree_inv, fminus, fplus, dff[[i]])
+
+      obj_constants <- c(rep(0, length(fminus)), 1)
+
+      obj_dir <- "min"
+
+
+
+      opt <- lpSolve::lp(direction = obj_dir,
+                         objective.in = obj_constants,
+                         const.mat <- const$constraints,
+                         const.dir =  const$direction,
+                         const.rhs = const$rhs)
+
+      if(opt$objval > objval){
+        fmat <- matrix(opt$solution[1:length(fminus)], nrow=1, ncol=length(fminus))
+        objval <- opt$objval
+      }
+
+
+    }
+
+
+
+    colnames(fmat) <- names(fminus)
+    return(fmat)
+  }else{
+    return(NULL)
+  }
+}
+
+
 #' Find the frequencies to use for the k star confidence interval
 #' @param tree a binary tree matrix
 #' @param fminus the lower bound of the frequency confidence intervals
@@ -112,6 +154,39 @@ solveFUpper <- function(tree, fminus, fplus, dff){
     return(NULL)
   }
 }
+
+.generateConstraintsUpper2 <- function(tree_inv, fminus, fplus, dff){
+  tree_inv_ord <- tree_inv[, names(fminus)]
+  diagMat <- diag(x=1, length(fminus), length(fminus))
+  colnames(diagMat) <- names(fminus)
+
+  #add left hand side of constraints to ensure f is non-negative and less than 1
+  constraints <- rbind(diagMat, diagMat)
+
+  #add constraints for the sum condition
+  constraints <- rbind(constraints, tree_inv_ord)
+
+
+
+  dff_clones <- tree_inv_ord[rownames(tree_inv_ord) %in% trimws(dff),]
+
+  z_col <- c(rep(0, nrow(constraints)), rep(-1, length(dff)))
+
+  constraints <- rbind(constraints, dff_clones)
+  constraints <- cbind(constraints, z_col)
+
+  rhs <- c(fminus, fplus, rep(0, nrow(tree_inv_ord)), rep(0, length(dff)))
+
+  dir <- c( rep(">=", nrow(diagMat)), rep("<=", nrow(diagMat)), rep(">=", (nrow(tree_inv_ord))))
+
+
+  dir_z <- rep(">=", length(dff))
+
+
+  dir <- c(dir, dir_z)
+  return(list(constraints = constraints, rhs = rhs, direction = dir))
+}
+
 
 .generateConstraintsLower <- function(tree_inv, fminus, fplus, dff){
   tree_inv_ord <- tree_inv[, names(fminus)]
