@@ -165,7 +165,7 @@ phydose <- function(trees, fmatrices=NULL, umatrices = NULL,
         df_rename <- list()
 
         for(i in 1:length(df_fam)){
-            df <- df_fam[[i]][[1]]
+            df <- df_fam[[i]]
 
             dfclones <- stringr::str_split(df, " ")
             dfclones <- lapply(dfclones, .RemoveWS)

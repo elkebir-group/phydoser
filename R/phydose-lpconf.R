@@ -19,7 +19,7 @@
 solveFLower <- function(tree, fminus, fplus, dff){
 
   dff <- .MatchCloneNames(dff, rownames(tree))
-  print(dff)
+
   if( requireNamespace("lpSolve", quietly = TRUE)){
     objval <- -1
 
@@ -73,7 +73,7 @@ solveFLower <- function(tree, fminus, fplus, dff){
 solveFUpper <- function(tree, fminus, fplus, dff){
 
   dff <- .MatchCloneNames(dff, rownames(tree))
-  print(dff)
+
   if( requireNamespace("lpSolve", quietly = TRUE)){
     objval <- -Inf
 
@@ -127,7 +127,7 @@ solveFUpper <- function(tree, fminus, fplus, dff){
 
 
   dff_clones <- tree_inv_ord[rownames(tree_inv_ord) %in% trimws(dff),]
-  print(dff_clones)
+
   z_col <- c(rep(0, nrow(constraints)), rep(-1, length(dff)))
 
   constraints <- rbind(constraints, dff_clones)
@@ -161,7 +161,7 @@ solveFUpper <- function(tree, fminus, fplus, dff){
 
 
   dff_clones <- tree_inv_ord[rownames(tree_inv_ord) %in% trimws(dff),]
-  print(dff_clones)
+
   z_col <- c(rep(0, nrow(constraints)), rep(-1, length(dff)))
   binary_vars <- length(dff)
 
@@ -177,7 +177,6 @@ solveFUpper <- function(tree, fminus, fplus, dff){
 
   }
 
-  print(uconstraints)
 
 
 
@@ -210,7 +209,7 @@ solveFUpper <- function(tree, fminus, fplus, dff){
   df_rename <- list()
 
   for(i in 1:length(df_fam)){
-    df <- df_fam[[i]][[1]]
+    df <- df_fam[[i]]
 
     dfclones <- stringr::str_split(df, " ")
     dfclones <- lapply(dfclones, function(x) x[x != ""])
