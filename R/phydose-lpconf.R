@@ -116,7 +116,7 @@ solveFUpper <- function(tree, fminus, fplus, dff){
     tree_inv <- t(solve(tree))
     for(i in 1:length(dff)){
 
-      const <- .generateConstraintsUpper2(tree_inv, fminus, fplus, dff[[i]])
+      const <- .generateConstraintsUpper(tree_inv, fminus, fplus, dff[[i]])
 
       obj_constants <- c(rep(0, length(fminus)), 1)
 
