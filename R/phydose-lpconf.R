@@ -19,6 +19,7 @@
 solveFLower <- function(tree, fminus, fplus, dff){
 
   dff <- .MatchCloneNames(dff, rownames(tree))
+  print(dff)
   if( requireNamespace("lpSolve", quietly = TRUE)){
     objval <- -1
 
@@ -72,6 +73,7 @@ solveFLower <- function(tree, fminus, fplus, dff){
 solveFUpper <- function(tree, fminus, fplus, dff){
 
   dff <- .MatchCloneNames(dff, rownames(tree))
+  print(dff)
   if( requireNamespace("lpSolve", quietly = TRUE)){
     objval <- -Inf
 
@@ -125,7 +127,7 @@ solveFUpper <- function(tree, fminus, fplus, dff){
 
 
   dff_clones <- tree_inv_ord[rownames(tree_inv_ord) %in% trimws(dff),]
-
+  print(dff_clones)
   z_col <- c(rep(0, nrow(constraints)), rep(-1, length(dff)))
 
   constraints <- rbind(constraints, dff_clones)
