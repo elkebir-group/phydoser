@@ -120,7 +120,7 @@ solveF <- function(tree, fminus, fplus, dff, maxObj= T){
   dir <- c( rep(">=", nrow(diagMat)), rep("<=", nrow(diagMat)), rep(">=", (nrow(tree_inv_ord))))
 
   if(maxObj){
-    dir_z <- rep("<=", length(dff))
+    dir_z <- rep(">=", length(dff))
   }else{
     dir_z <- rep("<=", length(dff))
   }
