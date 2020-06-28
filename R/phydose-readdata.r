@@ -225,7 +225,7 @@ ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus", include_u = T){
 
       dots[[tree_count]] <- .CreateGraphDot(vecs)
 
-     if((stringr::str_detect(charVec[i], "tree [0-9]+"))){
+     if(stringr::str_detect(charVec[i], "tree [0-9]+") ||stringr::str_detect(charVec[i], "[0-9]+ #edges")){
        s <- i + 1
      }else{
        s <- NULL
@@ -233,7 +233,7 @@ ReadJoint <- function(fname, fmultiplier=1, fvalues = "fplus", include_u = T){
       e <- NULL
     }
 
-    if(stringr::str_detect(charVec[i], "tree [0-9]+") && is.null(s) ){
+    if((stringr::str_detect(charVec[i], "tree [0-9]+") || stringr::str_detect(charVec[i], "[0-9]+ #edges")) && is.null(s) ){
       s <- i + 1
     }
 
