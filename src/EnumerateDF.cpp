@@ -17,6 +17,7 @@
 #include <sstream>
 #include <regex>
 #include <string.h>
+using namespace Rcpp;
 
 typedef std::map<std::string,std::string> StringMap;
 typedef std::map<std::string,int> StringIntMap;
@@ -88,6 +89,7 @@ Rcpp::List enumerateDF(Rcpp::List tree_mats){
     //          - Each row is added to an intsetset (intsetset represents each matrix)
     std::vector<IntSetSet> treesFeatures(nrTrees);
     for (int i = 0; i < nrTrees; i++){ // for each tree
+       Rcpp::checkUserInterrupt();
         std::vector<std::string> mutsList = Rcpp::as<std::vector<std::string>>(Rcpp::colnames(tree_mats[i])); // each tree may have different order of colnames
         for (int j = 0; j < nrMuts; j++){ // for each row (clone/feature)
             IntSet feature;
@@ -140,6 +142,7 @@ Rcpp::List enumerateDF(Rcpp::List tree_mats){
     // Step 4. Convert features from step 2 to bitsets
     std::vector<IntSetVector> idxToFeatureMap2;
     std::vector<Family> FamilyVector2;
+    Rcpp::checkUserInterrupt();
     for (int i = 0; i < nrTrees; ++i){
         Family fam; // Feature family of tree i (a collection of features)
         IntSetVector itfMap2(m);
@@ -172,6 +175,7 @@ Rcpp::List enumerateDF(Rcpp::List tree_mats){
     // Step 6. Enumerate distingushing features for each tree
     std::vector<FeatureFamily> PhiVector;
     for (auto fam : FamilyVector2){
+        Rcpp::checkUserInterrupt();
         FeatureFamily Phi;
         getDFF(fam, Universe, m, Phi, allFeatures);
         PhiVector.push_back(Phi);

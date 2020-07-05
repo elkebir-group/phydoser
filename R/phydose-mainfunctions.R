@@ -15,12 +15,15 @@ generateDistFeat <- function(treeList){
     dff <- tryCatch({
         enumerateDF(treeList)
     },
-    error = function(err){
-        print(paste("MY_ERROR:  ",err))
-        return(list())}
+    interrupt = function(x){
+        print("code interrupted")
+    }
+    # error = function(err){
+    #     print(paste("MY_ERROR:  ",err))
+    #     return(list())}
     )
 
-
+ 
     for(i in 1:length( dff)){
         dff[i] <- lapply(dff[i], stringr::str_split, ",")
     }
@@ -62,7 +65,7 @@ phydose <- function(trees, fmatrices=NULL, umatrices = NULL,
 
     phyDOSE <- data.frame(stringsAsFactors = F)
     if(is.null(distFeat)){
-
+    
         distFeat <- generateDistFeat(trees)
 
     }
