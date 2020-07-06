@@ -108,6 +108,7 @@ Rcpp::List enumerateDF(Rcpp::List tree_mats){
     // Step 3. Enumerate all sets of size 1<= i <= m containing combinations of integers from 1 to m. Each combination of integers is called "Feature"
     FeatureFamily allFeatures;
     for (int i = 1; i <= m; ++i){
+      Rcpp::checkUserInterrupt();
         Feature new_feature;
         for (int j = 1; j <= i; ++j){
             new_feature.push_back(j);
@@ -142,8 +143,9 @@ Rcpp::List enumerateDF(Rcpp::List tree_mats){
     // Step 4. Convert features from step 2 to bitsets
     std::vector<IntSetVector> idxToFeatureMap2;
     std::vector<Family> FamilyVector2;
-    Rcpp::checkUserInterrupt();
+ 
     for (int i = 0; i < nrTrees; ++i){
+      Rcpp::checkUserInterrupt();
         Family fam; // Feature family of tree i (a collection of features)
         IntSetVector itfMap2(m);
         int idx = 0;
